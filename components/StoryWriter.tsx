@@ -7,24 +7,36 @@ import { Textarea } from "./ui/textarea"
 import axios from "axios"
 
 function StoryWriter() {
-    const [story, setStory] = useState("")
+    const [story, setStory] = useState<string>("")
     const [pages, setPages] = useState<number>()
     const [progress, setProgress] = useState("")
     const [started, setStarted] = useState<boolean>(false)
     const [finished, setFinished] = useState<boolean | null>(null)
     const [currentTool, setCurrentTool] = useState<string>("")
 
-    const path = "public/stories"
+    const storiesPath = "public/stories"
 
     const handleClick = async () => {
         setStarted(true)
         setFinished(false)
         setProgress("Working...")
-        // const response = await axios("/api/run_script", {
-        //     story,
-        //     pages,
-        //     path
-        // })
+
+        const response = await axios.post("/api/run_script", {
+            story,
+            pages,
+            path: storiesPath,
+        })
+
+        if (response && response.data) { 
+            console.log("Streaming started!");
+            
+        }
+        else {
+            setFinished(true)
+            setStarted(false)
+            console.log("Failed to start streaming!");
+            
+        }
     }
 
     return (
@@ -55,7 +67,7 @@ function StoryWriter() {
                     <div>
                         {finished === null && (
                             <>
-                                <p className="m-5 animate-pulse">Generating Story...</p>
+                                <p className="mr-5 animate-pulse">Generating Story...</p>
                                 <br />
                             </>
                         )}
@@ -65,14 +77,14 @@ function StoryWriter() {
 
                     {currentTool && (
                         <div className="py-10">
-                            <span className="mr-5">{">>"}</span>
+                            <span className="mr-5">{"[Current Tool]"}</span>
                             {currentTool}
                         </div>
                     )}
 
                     {started && (
                         <div>
-                            <span className="mr-5 animate-in">{"AI story generator has started"}</span>
+                            <span className="mr-5 animate-in">{"[AI story generator has started]"}</span>
                         </div>
                     )}
                 </div>
