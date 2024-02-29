@@ -35,7 +35,6 @@ function StoryWriter() {
             setFinished(true)
             setStarted(false)
             console.log("Failed to start streaming!");
-            
         }
     }
 
