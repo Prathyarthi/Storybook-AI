@@ -7,10 +7,7 @@ export default function Home() {
     <>
       <Header />
       <main className="flex-1 flex flex-col">
-        <section className="flex-1 grid grid-cols-1 lg:grid-cols-2">
-          <div>
-            <ExploreStories />
-          </div>
+        <section className="">
           <StoryWriter />
         </section>
       </main>
