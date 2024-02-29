@@ -3,7 +3,7 @@ import { Button } from "./ui/button"
 
 function ExploreStories() {
     return (
-        <div className="w-[50%] flex justify-center items-center">
+        <div className="">
             <section className="flex ">
                 <Button asChild>
                     <Link href="/stories">

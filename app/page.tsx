@@ -11,6 +11,9 @@ export default function Home() {
           <StoryWriter />
         </section>
       </main>
+      <div className="m-8">
+        <ExploreStories />
+      </div>
     </>
   );
 }
