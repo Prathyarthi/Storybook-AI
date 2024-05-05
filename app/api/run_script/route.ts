@@ -4,7 +4,7 @@ import { RunEventType, RunOpts } from "@gptscript-ai/gptscript";
 export async function POST(req: Request) {
     const { story, pages, path } = await req.json();
 
-    const scriptPath = "app/api/run_script/script.gpt";
+    const scriptPath = "app/api/run_script/story-book.gpt";
 
     const opts: RunOpts = {
         disableCache: true,
