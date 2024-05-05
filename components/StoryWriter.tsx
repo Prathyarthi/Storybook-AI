@@ -5,6 +5,7 @@ import { Button } from "./ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import axios from "axios"
+import { Frame } from "@gptscript-ai/gptscript"
 
 function StoryWriter() {
     const [story, setStory] = useState<string>("")
@@ -13,6 +14,7 @@ function StoryWriter() {
     const [started, setStarted] = useState<boolean>(false)
     const [finished, setFinished] = useState<boolean | null>(null)
     const [currentTool, setCurrentTool] = useState<string>("")
+    const [events, setEvents] = useState<Frame[]>([])
 
     const storiesPath = "public/stories"
 
@@ -27,14 +29,58 @@ function StoryWriter() {
             path: storiesPath,
         })
 
-        if (response && response.data) { 
+        if (response && response.data) {
             console.log("Streaming started!");
-            
+
+            const reader = response.data.getReader()
+            const decoder = new TextDecoder()
+
+            handleStream(reader, decoder)
+
         }
         else {
             setFinished(true)
             setStarted(false)
             console.log("Failed to start streaming!");
+        }
+    }
+
+    async function handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, decoder: TextDecoder) {
+        while (true) {
+            const { done, value } = await reader.read()
+
+            if (done) break;
+
+            const chunk = decoder.decode(value)
+
+            const eventData = chunk
+                .split("\n\n")
+                .filter((line) => line.startsWith("event:"))
+                .map((line) => line.replace(/^event: /, ""))
+
+            eventData.forEach((data) => {
+                try {
+                    const parsedData = JSON.parse(data)
+
+                    if (parsedData.type === "callProgress") {
+                        setProgress(parsedData.output[parsedData.output.length - 1].content)
+                        setCurrentTool(parsedData.tool?.description || "")
+                    }
+                    else if (parsedData.type === "callStart") {
+                        setCurrentTool(parsedData.tool?.description || "")
+                    }
+                    else if (parsedData.type === "runFinish") {
+                        setFinished(true)
+                        setStarted(false)
+                    }
+                    else {
+                        setEvents((prevEvents) => [...prevEvents], parsedData)
+                    }
+                } catch (error) {
+                    console.log("Failed to parse JSON", error);
+
+                }
+            })
         }
     }
 
@@ -80,6 +126,15 @@ function StoryWriter() {
                             {currentTool}
                         </div>
                     )}
+
+                    <div className="space-y-5">
+                        {events.map((event, index) => (
+                            <div key={index}>
+                                <span className="mr-5">{">>"}</span>
+                                {renderEventMessage(event)}
+                            </div>
+                        ))}
+                    </div>
 
                     {started && (
                         <div>
