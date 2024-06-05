@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Textarea } from "./ui/textarea"
 import axios from "axios"
 import { Frame } from "@gptscript-ai/gptscript"
+import renderEventMessage from "@/lib/renderEventMessage"
 
 function StoryWriter() {
     const [story, setStory] = useState<string>("")
@@ -51,7 +52,7 @@ function StoryWriter() {
 
             if (done) break;
 
-            const chunk = decoder.decode(value)
+            const chunk = decoder.decode(value, { stream: true })
 
             const eventData = chunk
                 .split("\n\n")
@@ -74,7 +75,7 @@ function StoryWriter() {
                         setStarted(false)
                     }
                     else {
-                        setEvents((prevEvents) => [...prevEvents], parsedData)
+                        setEvents((prevEvents) => [...prevEvents, parsedData])
                     }
                 } catch (error) {
                     console.log("Failed to parse JSON", error);
